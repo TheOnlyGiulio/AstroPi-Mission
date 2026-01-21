@@ -1,9 +1,6 @@
 from datetime import datetime, timedelta
 from time import sleep
 
-
-# Rullino, molto carino, pino
-
 # Create a variable to store the start time
 start_time = datetime.now()
 # Create a variable to store the current time
@@ -18,4 +15,3 @@ while (now_time < start_time + timedelta(minutes=1)):
     # Update the current time
     now_time = datetime.now()
 # Out of the loop — stopping
-pallone palle
