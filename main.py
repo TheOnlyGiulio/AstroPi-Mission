@@ -18,3 +18,4 @@ while (now_time < start_time + timedelta(minutes=1)):
     # Update the current time
     now_time = datetime.now()
 # Out of the loop — stopping
+pallone palle
