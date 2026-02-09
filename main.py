@@ -98,8 +98,10 @@ while (now_time < start_time + timedelta(minutes=1)):
         length = len(speed_list)
         amount = sum(speed_list)
         average = amount/length
+        string = str(average)
         print(average)
-        
+        with open("result.txt","w",encoding="utf-8") as result:
+            result.write(string)
     counter+=1
     now_time = datetime.now()
         
