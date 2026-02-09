@@ -82,7 +82,7 @@ while (now_time < start_time + timedelta(minutes=1)):
     image = f"image_{counter}.jpg" # Image file name
     print("Counter", counter, "Hello ISS now:", now_time, "until:", start_time+ timedelta(minutes=1))
     cam.take_photo(image) # Takes a photo
-    sleep(5)
+    sleep(2)
     # Update the current time
     if counter>1:
         time_difference = get_time_difference(f"image_{counter-1}.jpg", f"image_{counter}.jpg") #get time difference between images
@@ -93,16 +93,17 @@ while (now_time < start_time + timedelta(minutes=1)):
         average_feature_distance = calculate_mean_distance(coordinates_1, coordinates_2)
         speed = calculate_speed_in_kmps(average_feature_distance, 12648, time_difference)
         speed_list= []
-        speed.append(speed_list)
+        speed_list.append(speed)
         print(speed_list)
-        length = len(speed_list)
-        amount = sum(speed_list)
-        average = amount/length
-        string = str(average)
-        print(average)
-        with open("result.txt","w",encoding="utf-8") as result:
-            result.write(string)
     counter+=1
     now_time = datetime.now()
+
+length = len(speed_list)
+amount = sum(speed_list)
+average = amount/length
+string = str(f"{average:.4f}")
+print(average)
+with open("result.txt","w",encoding="utf-8") as result:
+    result.write(string)
         
 # Out of the loop — stopping
