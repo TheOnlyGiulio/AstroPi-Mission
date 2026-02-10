@@ -16,6 +16,8 @@ import math
 # Import the Camera class to control the Pi camera
 from picamzero import Camera
 
+from pathlib import Path  # Import the Path class from the pathlib library
+from logzero import logger, logfile  # Import logger and logfile from the logzero library
 
 # Function to extract the original timestamp from an image EXIF metadata
 def get_time(image):
@@ -145,67 +147,81 @@ now_time = datetime.now()
 # Initialize image counter
 counter = 1
 
+try: 
+    base_folder = Path(__file__).parent.resolve()
+except NameError:
+    base_folder = Path.cwd()
+
+logfile(base_folder / "events.log")# Initialize the log file for events
+data_file = base_folder / "result.txt"# Define the data file path
+
+try:
 # Run the loop for 1 minute
-while (now_time < start_time + timedelta(minutes=1)):
-    # Generate image filename
-    image = f"image_{counter}.jpg"
-    
-    # Print status information
-    print("Counter", counter, "Hello ISS now:", now_time, "until:", start_time + timedelta(minutes=1))
-    
-    # Capture a photo
-    cam.take_photo(image)
-    
-    # Wait 2 seconds before next capture
-    sleep(2)
-    
-    # Process images only if at least two images exist
-    if counter > 1:
-        # Calculate time difference between consecutive images
-        time_difference = get_time_difference(
-            f"image_{counter-1}.jpg",
-            f"image_{counter}.jpg"
-        )
+    while (now_time < start_time + timedelta(minutes=1)):
+        # Generate image filename
+        image = f"image_{counter}.jpg"
         
-        # Convert images to OpenCV format
-        image_1_cv, image_2_cv = convert_to_cv(
-            f"image_{counter-1}.jpg",
-            f"image_{counter}.jpg"
-        )
+        # Print status information
+        print("Counter", counter, "Hello ISS now:", now_time, "until:", start_time + timedelta(minutes=1))
         
-        # Detect keypoints and descriptors
-        keypoints_1, keypoints_2, descriptors_1, descriptors_2 = calculate_features(
-            image_1_cv, image_2_cv, 1000
-        )
+        # Capture a photo
+        cam.take_photo(image)
         
-        # Match descriptors between images
-        matches = calculate_matches(descriptors_1, descriptors_2)
+        # Wait 2 seconds before next capture
+        sleep(2)
         
-        # Extract matching coordinates
-        coordinates_1, coordinates_2 = find_matching_coordinates(
-            keypoints_1, keypoints_2, matches
-        )
+        # Process images only if at least two images exist
+        if counter > 1:
+            # Calculate time difference between consecutive images
+            time_difference = get_time_difference(
+                f"image_{counter-1}.jpg",
+                f"image_{counter}.jpg"
+            )
+            
+            # Convert images to OpenCV format
+            image_1_cv, image_2_cv = convert_to_cv(
+                f"image_{counter-1}.jpg",
+                f"image_{counter}.jpg"
+            )
+            
+            # Detect keypoints and descriptors
+            keypoints_1, keypoints_2, descriptors_1, descriptors_2 = calculate_features(
+                image_1_cv, image_2_cv, 1000
+            )
+            
+            # Match descriptors between images
+            matches = calculate_matches(descriptors_1, descriptors_2)
+            
+            # Extract matching coordinates
+            coordinates_1, coordinates_2 = find_matching_coordinates(
+                keypoints_1, keypoints_2, matches
+            )
+            
+            # Calculate average feature displacement
+            average_feature_distance = calculate_mean_distance(coordinates_1, coordinates_2)
+            
+            # Calculate speed
+            speed = calculate_speed_in_kmps(
+                average_feature_distance, 12648, time_difference
+            )
+            logger.info(f"Speed {counter}: {speed}")
+            with open(data_file, "w", buffering=1) as f:# Write a speed value to data file
+                f.write(f"{speed:.5g}")
+            
+            # Create a list to store speed values
+            speed_list = []
+            speed_list.append(speed)
+            
+            # Print the speed list
+            print(speed_list)
         
-        # Calculate average feature displacement
-        average_feature_distance = calculate_mean_distance(coordinates_1, coordinates_2)
+        # Increment image counter
+        counter += 1
         
-        # Calculate speed
-        speed = calculate_speed_in_kmps(
-            average_feature_distance, 12648, time_difference
-        )
-        
-        # Create a list to store speed values
-        speed_list = []
-        speed_list.append(speed)
-        
-        # Print the speed list
-        print(speed_list)
-    
-    # Increment image counter
-    counter += 1
-    
-    # Update current time
-    now_time = datetime.now()
+        # Update current time
+        now_time = datetime.now()
+except Exception as e:
+    logger.info(f'{e.__class__.__name__}: {e}')  # Log any exceptions that occur
 
 
 # Calculate average speed after the loop
@@ -216,11 +232,11 @@ average = amount / length
 # Format the average speed
 string = str(f"{average:.4f}")
 
-# Print the average speed
+# Print the alogger.info(f"Plausible average: {speed}")  
 print(average)
 
 # Write the result to a text file
-with open("result.txt", "w", encoding="utf-8") as result:
+with open("data_file", "w", encoding="utf-8") as result:
     result.write(string)
         
 # End of the program
