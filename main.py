@@ -156,19 +156,19 @@ logfile(base_folder / "events.log")# Initialize the log file for events
 data_file = base_folder / "result.txt"# Define the data file path
 
 try:
-# Run the loop for 1 minute
-    while (now_time < start_time + timedelta(minutes=1)):
+# Run the loop for 9 minute
+    while (now_time < start_time + timedelta(minutes=9)):
         # Generate image filename
         image = f"image_{counter}.jpg"
         
         # Print status information
-        print("Counter", counter, "Hello ISS now:", now_time, "until:", start_time + timedelta(minutes=1))
+        print("Counter", counter, "Hello ISS now:", now_time, "until:", start_time + timedelta(minutes=9))
         
         # Capture a photo
         cam.take_photo(image)
         
-        # Wait 2 seconds before next capture
-        sleep(2)
+        # Wait 15 seconds before next capture
+        sleep(15)
         
         # Process images only if at least two images exist
         if counter > 1:
@@ -236,7 +236,7 @@ string = str(f"{average:.4f}")
 print(average)
 
 # Write the result to a text file
-with open("data_file", "w", encoding="utf-8") as result:
+with open(data_file, "w", encoding="utf-8") as result:
     result.write(string)
         
 # End of the program
